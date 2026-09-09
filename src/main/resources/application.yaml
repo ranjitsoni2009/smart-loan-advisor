@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: smart-loan-advisor
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+
