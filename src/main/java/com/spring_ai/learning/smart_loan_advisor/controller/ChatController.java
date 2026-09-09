@@ -20,8 +20,14 @@ public class ChatController {
     private ChatService chatService;
 
     @GetMapping("/default-chat-client")
-    public ResponseEntity<String> defaultChatApiWithDefaultClient(@RequestParam("query") String query) {
-        String queryResponse = chatService.getAnswer(query);
+    public ResponseEntity<String> chatApiWithDefaultChatClient(@RequestParam("query") String query) {
+        String queryResponse = chatService.getAnswerByDefaultChatClient(query);
+        return ResponseEntity.ok(queryResponse);
+    }
+
+    @GetMapping("/custom-chat-client")
+    public ResponseEntity<String> chatApiWithCustomChatClient(@RequestParam("query") String query) {
+        String queryResponse = chatService.getAnswerByCustomChatClient(query);
         return ResponseEntity.ok(queryResponse);
     }
 }

@@ -16,4 +16,11 @@ public class ChatClientConfig {
     public ChatClient defaultChatClient(ChatClient.Builder builder) {
         return builder.build();
     }
+
+    @Bean
+    public ChatClient customChatClient(ChatClient.Builder builder) {
+        return builder.defaultSystem("You are GK Assistant, who will help to answer GK related query, " +
+                "If any query is not in your knowledge base then deny the request with respect. In case of denial, Just mention before your response" +
+                ", I have knowledge cut off of 2021, then include your answer").build();
+    }
 }

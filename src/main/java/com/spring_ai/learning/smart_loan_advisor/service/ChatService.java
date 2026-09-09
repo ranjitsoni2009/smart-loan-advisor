@@ -3,6 +3,7 @@ package com.spring_ai.learning.smart_loan_advisor.service;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,11 +13,26 @@ import org.springframework.stereotype.Service;
 @Service
 public class ChatService {
 
-    @Autowired
-    private ChatClient chatClient;
+    private final ChatClient defaultchatClient;
+    private final ChatClient customChatClient;
 
-    public String getAnswer(String query) {
-        return chatClient.prompt()
+    @Autowired
+    public ChatService(
+            @Qualifier("defaultChatClient") ChatClient defaultchatClient,
+            @Qualifier("customChatClient") ChatClient customChatClient) {
+        this.defaultchatClient = defaultchatClient;
+        this.customChatClient = customChatClient;
+    }
+
+    public String getAnswerByDefaultChatClient(String query) {
+        return defaultchatClient.prompt()
+                .user(query)
+                .call()
+                .content();
+    }
+
+    public String getAnswerByCustomChatClient(String query) {
+        return customChatClient.prompt()
                 .user(query)
                 .call()
                 .content();
