@@ -37,4 +37,11 @@ public class ChatService {
                 .call()
                 .content();
     }
+
+    public ChatResponse getAnswerInChatResponseObj(String query) {
+        return customChatClient.prompt()
+                .user(query)
+                .call()
+                .chatResponse();
+    }
 }
