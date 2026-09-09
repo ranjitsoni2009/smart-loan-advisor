@@ -37,4 +37,10 @@ public class ChatController {
         ChatResponse queryResponse = chatService.getAnswerInChatResponseObj(query);
         return ResponseEntity.ok(queryResponse);
     }
+
+    @GetMapping("/return-record-entity")
+    public ResponseEntity<Record> getMoviesInfoForActor(@RequestParam("actorName") String actorName) {
+        Record actorMovies = chatService.getMoviesInfoForActor(actorName);
+        return ResponseEntity.ok(actorMovies);
+    }
 }

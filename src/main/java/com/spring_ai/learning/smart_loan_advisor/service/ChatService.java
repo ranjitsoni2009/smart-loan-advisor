@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Created by Ranjit Soni on 08-09-2026.
  * Author: ranjitsoni2009@gmail.com
@@ -43,5 +45,13 @@ public class ChatService {
                 .user(query)
                 .call()
                 .chatResponse();
+    }
+
+    public Record getMoviesInfoForActor(String actorName) {
+        record ActorFilms(String actor, List<String> movies) {}
+        return customChatClient.prompt()
+                .user("Generate the filmography for a "+actorName+" actor.")
+                .call()
+                .entity(ActorFilms.class);
     }
 }
