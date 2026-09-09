@@ -19,8 +19,8 @@ public class ChatController {
     @Autowired
     private ChatService chatService;
 
-    @GetMapping("/chat")
-    public ResponseEntity<String> chatApi(@RequestParam("query") String query) {
+    @GetMapping("/default-chat-client")
+    public ResponseEntity<String> defaultChatApiWithDefaultClient(@RequestParam("query") String query) {
         String queryResponse = chatService.getAnswer(query);
         return ResponseEntity.ok(queryResponse);
     }

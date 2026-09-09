@@ -12,12 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ChatService {
 
-    private final ChatClient chatClient;
-
     @Autowired
-    public ChatService(ChatClient.Builder chatClientBuilder) {
-        this.chatClient = chatClientBuilder.build();
-    }
+    private ChatClient chatClient;
 
     public String getAnswer(String query) {
         return chatClient.prompt()
