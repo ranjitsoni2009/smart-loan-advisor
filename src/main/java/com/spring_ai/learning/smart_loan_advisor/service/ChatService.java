@@ -2,11 +2,17 @@ package com.spring_ai.learning.smart_loan_advisor.service;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by Ranjit Soni on 08-09-2026.
@@ -53,5 +59,43 @@ public class ChatService {
                 .user("Generate the filmography for a "+actorName+" actor.")
                 .call()
                 .entity(ActorFilms.class);
+    }
+
+    public List<String> getMoviesListForActor(String actorName) {
+        return defaultchatClient.prompt()
+                .user("Generate the filmography for a "+actorName+" actor.")
+                .call()
+                .entity(new ParameterizedTypeReference<>() {
+                });
+    }
+
+    public Record getBooksInfoForWriter(String authorName) {
+        record AuthorBook(String authorName, List<String> books) {}
+        return customChatClient.prompt()
+                .user("Generate the books list for a "+authorName+" actor.")
+                .call()
+                .entity(AuthorBook.class, spec -> spec
+                        .useProviderStructuredOutput()
+                        .validateSchema());
+    }
+
+    public Record getBooksInfoUsingStream(String authorName) {
+        record AuthorBook(String authorName, List<String> books) {}
+        var converter = new BeanOutputConverter<>(AuthorBook.class);
+
+        Flux<String> flux = this.customChatClient.prompt()
+                .user(u -> u.text("""
+                        Generate the book list for a author {authorName}.
+                        {format}
+                      """)
+                        .param("authorName", authorName)
+                        .param("format", converter.getFormat()))
+                .stream()
+                .content();
+
+        String content = Objects.requireNonNull(flux.collectList().block()).stream()
+                .collect(Collectors.joining());
+
+        return converter.convert(content);
     }
 }

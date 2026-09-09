@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * Created by Ranjit Soni on 08-09-2026.
  * Author: ranjitsoni2009@gmail.com
@@ -38,9 +40,27 @@ public class ChatController {
         return ResponseEntity.ok(queryResponse);
     }
 
-    @GetMapping("/return-record-entity")
+    @GetMapping("/actor-movies-entity")
     public ResponseEntity<Record> getMoviesInfoForActor(@RequestParam("actorName") String actorName) {
         Record actorMovies = chatService.getMoviesInfoForActor(actorName);
         return ResponseEntity.ok(actorMovies);
+    }
+
+    @GetMapping("/return-list")
+    public ResponseEntity<List<String>> getMoviesListForActor(@RequestParam("actorName") String actorName) {
+        List<String> actorMovies = chatService.getMoviesListForActor(actorName);
+        return ResponseEntity.ok(actorMovies);
+    }
+
+    @GetMapping("/author-books-entity")
+    public ResponseEntity<Record> getBooksInfoForWriter(@RequestParam("authorName") String authorName) {
+        Record authorBooks = chatService.getBooksInfoForWriter(authorName);
+        return ResponseEntity.ok(authorBooks);
+    }
+
+    @GetMapping("/author-books-using-stream")
+    public ResponseEntity<Record> chatWithStreaming(@RequestParam("authorName") String authorName) {
+        Record authorBooks = chatService.getBooksInfoUsingStream(authorName);
+        return ResponseEntity.ok(authorBooks);
     }
 }
