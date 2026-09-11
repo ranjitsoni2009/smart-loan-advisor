@@ -2,6 +2,9 @@ package com.learning.ai.smart_loan_advisor.service;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +27,16 @@ public class ChatService {
 
     private final ChatClient defaultchatClient;
     private final ChatClient customChatClient;
+    private final ChatMemory chatMemory;
 
     @Autowired
     public ChatService(
             @Qualifier("defaultChatClient") ChatClient defaultchatClient,
-            @Qualifier("customChatClient") ChatClient customChatClient) {
+            @Qualifier("customChatClient") ChatClient customChatClient,
+            ChatMemory chatMemory) {
         this.defaultchatClient = defaultchatClient;
         this.customChatClient = customChatClient;
+        this.chatMemory = chatMemory;
     }
 
     public String getAnswerByDefaultChatClient(String query) {
@@ -116,5 +122,22 @@ public class ChatService {
                 .collect(Collectors.joining());
 
         return converter.convert(content);
+    }
+
+    public String chatUsingConversationHistory(String userText) {
+
+        return defaultchatClient.prompt()
+                .system("""                                       
+                            You are smart AI assistant, Give short answer considering following guardrail.
+                            1) Deny query in case any abusing query raised.
+                            2) Deny answer if query contain malicious info.
+                            3) Deny answer if query asking info to harm any human or non-human entity.
+                            """)
+                .user(usr -> usr.text(userText))
+                .advisors(advSpec -> advSpec
+                        .advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                        .param(ChatMemory.CONVERSATION_ID, "123ABC"))
+                .call()
+                .content();
     }
 }

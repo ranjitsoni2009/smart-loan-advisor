@@ -4,10 +4,7 @@ import com.learning.ai.smart_loan_advisor.service.ChatService;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,6 +15,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/ai")
 public class ChatController {
+
+    public record SearchRequest(String userText) {};
 
     @Autowired
     private ChatService chatService;
@@ -71,5 +70,12 @@ public class ChatController {
     public ResponseEntity<Record> chatWithStreaming(@RequestParam("authorName") String authorName) {
         Record authorBooks = chatService.getBooksInfoUsingStream(authorName);
         return ResponseEntity.ok(authorBooks);
+    }
+
+
+    @PostMapping("/chat-using-history")
+    public ResponseEntity<String> chatWithMemory(@RequestBody SearchRequest searchRequest) {
+        String queryResponse = chatService.chatUsingConversationHistory(searchRequest.userText());
+        return ResponseEntity.ok(queryResponse);
     }
 }
