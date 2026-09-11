@@ -1,6 +1,7 @@
-package com.spring_ai.learning.smart_loan_advisor.service;
+package com.learning.ai.smart_loan_advisor.service;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,19 @@ public class ChatService {
     public String getAnswerByDefaultChatClient(String query) {
         return defaultchatClient.prompt()
                 .user(query)
+                .call()
+                .content();
+    }
+
+    public String getAnswerBasedOnContextUsingDefaultChatClient(String query, String contextKey, String contextValue) {
+        return defaultchatClient.prompt()
+                .user(usr -> usr.text(query).metadata(contextKey, contextValue))
+                .system( sys -> sys
+                        .text(""" 
+                                You are GK Smart Agent. Response the query based on given context {contextKey}:{contextValue}, if you don't have answer then deny respectfully.
+                                """)
+                        .param("contextKey", contextKey)
+                        .param("contextValue", contextValue))
                 .call()
                 .content();
     }
@@ -79,6 +93,11 @@ public class ChatService {
                         .validateSchema());
     }
 
+    /**
+     * Example of Prompt Template with stream()
+     * @param authorName
+     * @return
+     */
     public Record getBooksInfoUsingStream(String authorName) {
         record AuthorBook(String authorName, List<String> books) {}
         var converter = new BeanOutputConverter<>(AuthorBook.class);

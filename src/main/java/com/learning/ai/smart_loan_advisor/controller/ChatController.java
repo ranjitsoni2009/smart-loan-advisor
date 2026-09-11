@@ -1,6 +1,6 @@
-package com.spring_ai.learning.smart_loan_advisor.controller;
+package com.learning.ai.smart_loan_advisor.controller;
 
-import com.spring_ai.learning.smart_loan_advisor.service.ChatService;
+import com.learning.ai.smart_loan_advisor.service.ChatService;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +26,15 @@ public class ChatController {
     public ResponseEntity<String> chatApiWithDefaultChatClient(@RequestParam("query") String query) {
         String queryResponse = chatService.getAnswerByDefaultChatClient(query);
         return ResponseEntity.ok(queryResponse);
+    }
+
+    @GetMapping("/query-with-context")
+    public ResponseEntity<String> getAnswerBasedOnContextUsingDefaultChatClient(
+            @RequestParam("query") String query,
+            @RequestParam("contextKey") String contextKey,
+            @RequestParam("contextValue") String contextValue) {
+        String response = chatService.getAnswerBasedOnContextUsingDefaultChatClient(query, contextKey, contextValue);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/custom-chat-client")

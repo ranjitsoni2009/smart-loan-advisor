@@ -1,4 +1,4 @@
-package com.spring_ai.learning.smart_loan_advisor;
+package com.learning.ai.smart_loan_advisor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
