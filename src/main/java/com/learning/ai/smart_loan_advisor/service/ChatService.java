@@ -1,12 +1,10 @@
 package com.learning.ai.smart_loan_advisor.service;
 
+import com.learning.ai.smart_loan_advisor.tool.LoanCalculatorTool;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
-import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +13,9 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Created by Ranjit Soni on 08-09-2026.
@@ -31,15 +27,17 @@ public class ChatService {
     private final ChatClient defaultchatClient;
     private final ChatClient customChatClient;
     private final ChatMemory chatMemory;
+    private final LoanCalculatorTool loanCalculatorTool;
 
     @Autowired
     public ChatService(
             @Qualifier("defaultChatClient") ChatClient defaultchatClient,
             @Qualifier("customChatClient") ChatClient customChatClient,
-            ChatMemory chatMemory) {
+            ChatMemory chatMemory, LoanCalculatorTool loanCalculatorTool) {
         this.defaultchatClient = defaultchatClient;
         this.customChatClient = customChatClient;
         this.chatMemory = chatMemory;
+        this.loanCalculatorTool = loanCalculatorTool;
     }
 
     public String getAnswerByDefaultChatClient(String query) {
@@ -121,9 +119,7 @@ public class ChatService {
                 .stream()
                 .content();
 
-        String content = Objects.requireNonNull(flux.collectList().block()).stream()
-                .collect(Collectors.joining());
-
+        String content = String.join("", Objects.requireNonNull(flux.collectList().block()));
         return converter.convert(content);
     }
 
@@ -131,23 +127,26 @@ public class ChatService {
         SimpleLoggerAdvisor customLogger = new SimpleLoggerAdvisor(
                 request -> {
                     assert request != null;
-                    return "Custom request: " + request.prompt().getUserMessage();
+                    return "Request --> "+request.prompt().getInstructions();
                 },
                 response -> {
                     assert response != null;
-                    return "Custom response: " + Objects.requireNonNull(response.getResult()).getOutput();
+                    return "Response: " + Objects.requireNonNull(response.getResult()).getOutput();
                 },
-                0
+                1
         );
 
         Consumer<ChatClient.AdvisorSpec> advisor = advSpec -> advSpec
-                .advisors(MessageChatMemoryAdvisor.builder(chatMemory).build(), customLogger)
+                .advisors(
+                        MessageChatMemoryAdvisor.builder(chatMemory).order(0).build()
+                        , customLogger)
                 .param(ChatMemory.CONVERSATION_ID, "123ABC");
 
         return defaultchatClient.prompt()
                 .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
                 .user(usr -> usr.text(userText))
                 .advisors(advisor)
+                .tools(loanCalculatorTool)
                 .call()
                 .content();
     }
