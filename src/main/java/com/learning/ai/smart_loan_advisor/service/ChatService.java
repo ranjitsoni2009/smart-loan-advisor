@@ -2,20 +2,26 @@ package com.learning.ai.smart_loan_advisor.service;
 
 import com.learning.ai.smart_loan_advisor.tool.LoanCalculatorTool;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.template.st.StTemplateRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * Created by Ranjit Soni on 08-09-2026.
@@ -24,19 +30,20 @@ import java.util.function.Consumer;
 @Service
 public class ChatService {
 
+    @Value("classpath:/templates/hr-policy.st")
+    private Resource systemResource;
+
     private final ChatClient defaultchatClient;
     private final ChatClient customChatClient;
-    private final ChatMemory chatMemory;
     private final LoanCalculatorTool loanCalculatorTool;
 
     @Autowired
     public ChatService(
             @Qualifier("defaultChatClient") ChatClient defaultchatClient,
             @Qualifier("customChatClient") ChatClient customChatClient,
-            ChatMemory chatMemory, LoanCalculatorTool loanCalculatorTool) {
+            LoanCalculatorTool loanCalculatorTool) {
         this.defaultchatClient = defaultchatClient;
         this.customChatClient = customChatClient;
-        this.chatMemory = chatMemory;
         this.loanCalculatorTool = loanCalculatorTool;
     }
 
@@ -102,8 +109,6 @@ public class ChatService {
 
     /**
      * Example of Prompt Template with stream()
-     * @param authorName
-     * @return
      */
     public Record getBooksInfoUsingStream(String authorName) {
         record AuthorBook(String authorName, List<String> books) {}
@@ -123,30 +128,52 @@ public class ChatService {
         return converter.convert(content);
     }
 
+    /**
+     * Advisor configured during ChatClient builder method during build in ChatClientConfig
+     * CONVERSATION_ID set at runtime
+     */
     public String chatUsingConversationHistory(String userText) {
-        SimpleLoggerAdvisor customLogger = new SimpleLoggerAdvisor(
-                request -> {
-                    assert request != null;
-                    return "Request --> "+request.prompt().getInstructions();
-                },
-                response -> {
-                    assert response != null;
-                    return "Response: " + Objects.requireNonNull(response.getResult()).getOutput();
-                },
-                1
-        );
-
-        Consumer<ChatClient.AdvisorSpec> advisor = advSpec -> advSpec
-                .advisors(
-                        MessageChatMemoryAdvisor.builder(chatMemory).order(0).build()
-                        , customLogger)
-                .param(ChatMemory.CONVERSATION_ID, "123ABC");
-
         return defaultchatClient.prompt()
                 .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
                 .user(usr -> usr.text(userText))
-                .advisors(advisor)
+                .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "123ABC"))
+                .call()
+                .content();
+    }
+
+    public String emiCalculator(String userText) {
+        return defaultchatClient.prompt()
+                .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
+                .user(usr -> usr.text(userText))
+                .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "123ABC"))
                 .tools(loanCalculatorTool)
+                .call()
+                .content();
+    }
+
+    public String chatUsingPromptTemplate(String composer) {
+        PromptTemplate promptTemplate = PromptTemplate.builder()
+                .renderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
+                .template("""
+                            Tell me the name of 5 movie whose soundtrack was composed by <compose>
+                        """)
+                .build();
+
+        String prompt = promptTemplate.render(Map.of("compose", composer));
+        return defaultchatClient.prompt(prompt)
+                .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "123ABC"))
+                .call()
+                .content();
+    }
+
+    public String getHrResponse(String userQuery) {
+        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemResource);
+        Message sysMessage = systemPromptTemplate.createMessage();
+        Message userMessage = new UserMessage(userQuery);
+
+        Prompt prompt = new Prompt(List.of(userMessage, sysMessage));
+        return defaultchatClient.prompt(prompt)
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, "13444"))
                 .call()
                 .content();
     }

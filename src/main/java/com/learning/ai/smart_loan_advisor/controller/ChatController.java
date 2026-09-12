@@ -78,4 +78,22 @@ public class ChatController {
         String queryResponse = chatService.chatUsingConversationHistory(searchRequest.userText());
         return ResponseEntity.ok(queryResponse);
     }
+
+    @PostMapping("/emi-calculator")
+    public ResponseEntity<String> emiCalculator(@RequestBody SearchRequest searchRequest) {
+        String queryResponse = chatService.emiCalculator(searchRequest.userText());
+        return ResponseEntity.ok(queryResponse);
+    }
+
+    @GetMapping("/chat-using-prompt-template")
+    public ResponseEntity<String> chatUsingPromptTemplate(@RequestParam("composer") String composer) {
+        String response = chatService.chatUsingPromptTemplate(composer);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/hr-enquiry")
+    public ResponseEntity<String> hrEnquiry(@RequestBody SearchRequest searchRequest) {
+        String queryResponse = chatService.getHrResponse(searchRequest.userText());
+        return ResponseEntity.ok(queryResponse);
+    }
 }
