@@ -3,6 +3,8 @@ package com.learning.ai.smart_loan_advisor.service;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -16,6 +18,7 @@ import reactor.core.publisher.Flux;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -125,18 +128,26 @@ public class ChatService {
     }
 
     public String chatUsingConversationHistory(String userText) {
+        SimpleLoggerAdvisor customLogger = new SimpleLoggerAdvisor(
+                request -> {
+                    assert request != null;
+                    return "Custom request: " + request.prompt().getUserMessage();
+                },
+                response -> {
+                    assert response != null;
+                    return "Custom response: " + Objects.requireNonNull(response.getResult()).getOutput();
+                },
+                0
+        );
+
+        Consumer<ChatClient.AdvisorSpec> advisor = advSpec -> advSpec
+                .advisors(MessageChatMemoryAdvisor.builder(chatMemory).build(), customLogger)
+                .param(ChatMemory.CONVERSATION_ID, "123ABC");
 
         return defaultchatClient.prompt()
-                .system("""                                       
-                            You are smart AI assistant, Give short answer considering following guardrail.
-                            1) Deny query in case any abusing query raised.
-                            2) Deny answer if query contain malicious info.
-                            3) Deny answer if query asking info to harm any human or non-human entity.
-                            """)
+                .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
                 .user(usr -> usr.text(userText))
-                .advisors(advSpec -> advSpec
-                        .advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-                        .param(ChatMemory.CONVERSATION_ID, "123ABC"))
+                .advisors(advisor)
                 .call()
                 .content();
     }
