@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeTypeUtils;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -174,6 +176,16 @@ public class ChatService {
         Prompt prompt = new Prompt(List.of(userMessage, sysMessage));
         return defaultchatClient.prompt(prompt)
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, "13444"))
+                .call()
+                .content();
+    }
+
+    public String chatWithMultiModalAPI() {
+        return defaultchatClient.prompt()
+                .user(usrText -> usrText
+                        .text("Explain what do you see in the picture")
+                        .media(MimeTypeUtils.IMAGE_JPEG, new ClassPathResource("image.jpeg")))
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, "123"))
                 .call()
                 .content();
     }

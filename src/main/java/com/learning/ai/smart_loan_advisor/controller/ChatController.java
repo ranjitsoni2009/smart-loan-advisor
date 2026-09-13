@@ -96,4 +96,10 @@ public class ChatController {
         String queryResponse = chatService.getHrResponse(searchRequest.userText());
         return ResponseEntity.ok(queryResponse);
     }
+
+    @GetMapping("/chat-with-multi-modal-api")
+    public ResponseEntity<String> chatWithMultimodal() {
+        String response = chatService.chatWithMultiModalAPI();
+        return ResponseEntity.ok(response);
+    }
 }
