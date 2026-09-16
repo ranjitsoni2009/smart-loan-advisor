@@ -3,8 +3,10 @@ package com.learning.ai.smart_loan_advisor.controller;
 import com.learning.ai.smart_loan_advisor.service.ChatService;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -101,5 +103,10 @@ public class ChatController {
     public ResponseEntity<String> chatWithMultimodal() {
         String response = chatService.chatWithMultiModalAPI();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> streamAiResponse(@RequestParam String query) {
+        return chatService.streamAiResponse(query);
     }
 }

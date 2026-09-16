@@ -6,10 +6,9 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.ai.chat.prompt.*;
 import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.template.st.StTemplateRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -181,12 +180,20 @@ public class ChatService {
     }
 
     public String chatWithMultiModalAPI() {
+        ChatOptions chatOptions = OpenAiChatOptions.builder().temperature(0.3).build();
         return defaultchatClient.prompt()
                 .user(usrText -> usrText
                         .text("Explain what do you see in the picture")
                         .media(MimeTypeUtils.IMAGE_JPEG, new ClassPathResource("image.jpeg")))
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, "123"))
                 .call()
+                .content();
+    }
+
+    public Flux<String> streamAiResponse(String prompt) {
+        return customChatClient.prompt()
+                .user(prompt)
+                .stream() // Triggers token-by-token generation from the LLM
                 .content();
     }
 }
