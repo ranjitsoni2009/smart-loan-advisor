@@ -3,8 +3,11 @@ package com.learning.ai.smart_loan_advisor.config;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +21,9 @@ import java.util.Objects;
 @Configuration
 public class ChatClientConfig {
 
+    @Autowired
+    private JdbcChatMemoryRepository jdbcChatMemoryRepository;
+
     /**
      * Advisor configured during ChatClient build
      * @return ChatClient
@@ -25,10 +31,20 @@ public class ChatClientConfig {
     @Bean
     public ChatClient defaultChatClient(ChatClient.Builder builder) {
         return builder.defaultAdvisors(
-                        messageChatMemoryAdvisor(),
+                        messageChatMemoryAdvisorForInMemory(),
                         simpleLoggerAdvisor())
                 .build();
     }
+
+    @Bean
+    public ChatClient chatClientWithJdbcChatMemory(ChatClient.Builder builder) {
+        return builder.defaultAdvisors(
+                        messageChatMemoryAdvisorForSqlDB(),
+                        simpleLoggerAdvisor())
+                .build();
+    }
+
+
 
     @Bean
     public ChatClient customChatClient(ChatClient.Builder builder) {
@@ -60,7 +76,20 @@ public class ChatClientConfig {
     }
 
     @Bean
-    public MessageChatMemoryAdvisor messageChatMemoryAdvisor() {
+    public MessageChatMemoryAdvisor messageChatMemoryAdvisorForInMemory() {
         return MessageChatMemoryAdvisor.builder(chatMemory()).order(0).build();
+    }
+
+    @Bean
+    public ChatMemory chatMemoryFromSqlDB() {
+        return MessageWindowChatMemory.builder()
+                .chatMemoryRepository(jdbcChatMemoryRepository)
+                .maxMessages(6)
+                .build();
+    }
+
+    @Bean
+    public MessageChatMemoryAdvisor messageChatMemoryAdvisorForSqlDB() {
+        return MessageChatMemoryAdvisor.builder(chatMemoryFromSqlDB()).build();
     }
 }

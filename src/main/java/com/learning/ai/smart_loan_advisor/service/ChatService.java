@@ -36,15 +36,18 @@ public class ChatService {
 
     private final ChatClient defaultchatClient;
     private final ChatClient customChatClient;
+    private final ChatClient chatClientWithJdbcChatMemory;
     private final LoanCalculatorTool loanCalculatorTool;
 
     @Autowired
     public ChatService(
             @Qualifier("defaultChatClient") ChatClient defaultchatClient,
             @Qualifier("customChatClient") ChatClient customChatClient,
+            @Qualifier("chatClientWithJdbcChatMemory") ChatClient chatClientWithJdbcChatMemory,
             LoanCalculatorTool loanCalculatorTool) {
         this.defaultchatClient = defaultchatClient;
         this.customChatClient = customChatClient;
+        this.chatClientWithJdbcChatMemory = chatClientWithJdbcChatMemory;
         this.loanCalculatorTool = loanCalculatorTool;
     }
 
@@ -194,6 +197,22 @@ public class ChatService {
         return customChatClient.prompt()
                 .user(prompt)
                 .stream() // Triggers token-by-token generation from the LLM
+                .content();
+    }
+
+    public String getAnswerBasedOnContextUsingSqlDbChatClient(String query, String userid, String contextKey, String contextValue) {
+        return chatClientWithJdbcChatMemory.prompt()
+                .user(usr -> usr
+                        .text(query)
+                        .metadata(contextKey, contextValue))
+                .system( sys -> sys
+                        .text(""" 
+                                You are GK Smart Agent. Response the query based on given context {contextKey}:{contextValue}, if you don't have answer then deny respectfully.
+                                """)
+                        .param("contextKey", contextKey)
+                        .param("contextValue", contextValue))
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, userid+"-"+contextKey+"-"+contextValue))
+                .call()
                 .content();
     }
 }

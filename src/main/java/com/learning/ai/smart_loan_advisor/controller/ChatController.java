@@ -109,4 +109,14 @@ public class ChatController {
     public Flux<String> streamAiResponse(@RequestParam String query) {
         return chatService.streamAiResponse(query);
     }
+
+    @GetMapping("/query-with-jdbc-memory")
+    public ResponseEntity<String> getAnswerBasedOnContextUsingSqlDbChatClient(
+            @RequestParam("query") String query,
+            @RequestParam("contextKey") String contextKey,
+            @RequestParam("contextValue") String contextValue,
+            @RequestHeader("userId") String userId) {
+        String response = chatService.getAnswerBasedOnContextUsingSqlDbChatClient(query, userId, contextKey, contextValue);
+        return ResponseEntity.ok(response);
+    }
 }
