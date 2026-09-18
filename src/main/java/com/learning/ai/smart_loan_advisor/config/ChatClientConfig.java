@@ -24,6 +24,9 @@ public class ChatClientConfig {
     @Autowired
     private JdbcChatMemoryRepository jdbcChatMemoryRepository;
 
+    @Autowired
+    private SimpleLoggerAdvisor simpleLoggerAdvisor;
+
     /**
      * Advisor configured during ChatClient build
      * @return ChatClient
@@ -32,7 +35,7 @@ public class ChatClientConfig {
     public ChatClient defaultChatClient(ChatClient.Builder builder) {
         return builder.defaultAdvisors(
                         messageChatMemoryAdvisorForInMemory(),
-                        simpleLoggerAdvisor())
+                        simpleLoggerAdvisor)
                 .build();
     }
 
@@ -40,7 +43,7 @@ public class ChatClientConfig {
     public ChatClient chatClientWithJdbcChatMemory(ChatClient.Builder builder) {
         return builder.defaultAdvisors(
                         messageChatMemoryAdvisorForSqlDB(),
-                        simpleLoggerAdvisor())
+                        simpleLoggerAdvisor)
                 .build();
     }
 
@@ -51,21 +54,6 @@ public class ChatClientConfig {
         return builder.defaultSystem("You are GK Assistant, who will help to answer GK related query, " +
                 "If any query is not in your knowledge base then deny the request with respect. In case of denial, Just mention before your response" +
                 ", I have knowledge cut off of 2021, then include your answer").build();
-    }
-
-    @Bean
-    public SimpleLoggerAdvisor simpleLoggerAdvisor() {
-        return new SimpleLoggerAdvisor(
-                request -> {
-                    assert request != null;
-                    return "Request --> "+request.prompt().getInstructions();
-                },
-                response -> {
-                    assert response != null;
-                    return "Response: " + Objects.requireNonNull(response.getResult()).getOutput();
-                },
-                1
-        );
     }
 
     @Bean

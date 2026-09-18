@@ -36,6 +36,8 @@ public class ChatService {
 
     private final ChatClient defaultchatClient;
     private final ChatClient customChatClient;
+    private final ChatClient inMemoryChatClient;
+    private final ChatClient h2MemoryChatClient;
     private final ChatClient chatClientWithJdbcChatMemory;
     private final LoanCalculatorTool loanCalculatorTool;
 
@@ -43,10 +45,14 @@ public class ChatService {
     public ChatService(
             @Qualifier("defaultChatClient") ChatClient defaultchatClient,
             @Qualifier("customChatClient") ChatClient customChatClient,
+            @Qualifier("inMemoryChatClient") ChatClient inMemoryChatClient,
+            @Qualifier("h2MemoryChatClient") ChatClient h2MemoryChatClient,
             @Qualifier("chatClientWithJdbcChatMemory") ChatClient chatClientWithJdbcChatMemory,
             LoanCalculatorTool loanCalculatorTool) {
         this.defaultchatClient = defaultchatClient;
         this.customChatClient = customChatClient;
+        this.inMemoryChatClient = inMemoryChatClient;
+        this.h2MemoryChatClient = h2MemoryChatClient;
         this.chatClientWithJdbcChatMemory = chatClientWithJdbcChatMemory;
         this.loanCalculatorTool = loanCalculatorTool;
     }
@@ -136,8 +142,17 @@ public class ChatService {
      * Advisor configured during ChatClient builder method during build in ChatClientConfig
      * CONVERSATION_ID set at runtime
      */
-    public String chatUsingConversationHistory(String userText) {
-        return defaultchatClient.prompt()
+    public String chatUsingInMemoryConversationHistory(String userText) {
+        return this.inMemoryChatClient.prompt()
+                .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
+                .user(usr -> usr.text(userText))
+                .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "123ABC"))
+                .call()
+                .content();
+    }
+
+    public String chatUsingH2ConversationHistory(String userText) {
+        return this.h2MemoryChatClient.prompt()
                 .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
                 .user(usr -> usr.text(userText))
                 .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "123ABC"))

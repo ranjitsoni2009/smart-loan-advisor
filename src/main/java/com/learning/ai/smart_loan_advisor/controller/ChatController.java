@@ -75,11 +75,6 @@ public class ChatController {
     }
 
 
-    @PostMapping("/chat-using-history")
-    public ResponseEntity<String> chatWithMemory(@RequestBody SearchRequest searchRequest) {
-        String queryResponse = chatService.chatUsingConversationHistory(searchRequest.userText());
-        return ResponseEntity.ok(queryResponse);
-    }
 
     @PostMapping("/emi-calculator")
     public ResponseEntity<String> emiCalculator(@RequestBody SearchRequest searchRequest) {
@@ -110,6 +105,18 @@ public class ChatController {
         return chatService.streamAiResponse(query);
     }
 
+    @PostMapping("/chat-using-in-memory-history")
+    public ResponseEntity<String> chatWithInMemory(@RequestBody SearchRequest searchRequest) {
+        String queryResponse = chatService.chatUsingInMemoryConversationHistory(searchRequest.userText());
+        return ResponseEntity.ok(queryResponse);
+    }
+
+    @PostMapping("/chat-using-h2-memory-history")
+    public ResponseEntity<String> chatWithH2Memory(@RequestBody SearchRequest searchRequest) {
+        String queryResponse = chatService.chatUsingH2ConversationHistory(searchRequest.userText());
+        return ResponseEntity.ok(queryResponse);
+    }
+
     @GetMapping("/query-with-jdbc-memory")
     public ResponseEntity<String> getAnswerBasedOnContextUsingSqlDbChatClient(
             @RequestParam("query") String query,
@@ -119,4 +126,6 @@ public class ChatController {
         String response = chatService.getAnswerBasedOnContextUsingSqlDbChatClient(query, userId, contextKey, contextValue);
         return ResponseEntity.ok(response);
     }
+
+
 }
