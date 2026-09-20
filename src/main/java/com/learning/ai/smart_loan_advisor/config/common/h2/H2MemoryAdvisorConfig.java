@@ -1,4 +1,4 @@
-package com.learning.ai.smart_loan_advisor.config.memory.inmemory;
+package com.learning.ai.smart_loan_advisor.config.common.h2;
 
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -10,15 +10,14 @@ import org.springframework.context.annotation.Configuration;
  * Created by Ranjit Soni on 18-09-2026.
  * Author: ranjitsoni2009@gmail.com
  */
-
 @Configuration
-public class InMemoryMemoryAdvisorConfig {
+public class H2MemoryAdvisorConfig {
 
     @Autowired
-    private ChatMemory inMemoryChatMemory;
+    private ChatMemory h2ChatMemory;
 
     @Bean
-    public MessageChatMemoryAdvisor inMemoryMessageChatMemoryAdvisor() {
-        return MessageChatMemoryAdvisor.builder(inMemoryChatMemory).build();
+    public MessageChatMemoryAdvisor h2MessageChatMemoryAdvisor() {
+        return MessageChatMemoryAdvisor.builder(h2ChatMemory).build();
     }
 }

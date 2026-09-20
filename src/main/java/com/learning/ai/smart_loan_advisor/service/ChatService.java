@@ -38,6 +38,7 @@ public class ChatService {
     private final ChatClient customChatClient;
     private final ChatClient inMemoryChatClient;
     private final ChatClient h2MemoryChatClient;
+    private final ChatClient mysqlMemoryChatClient;
     private final ChatClient chatClientWithJdbcChatMemory;
     private final LoanCalculatorTool loanCalculatorTool;
 
@@ -46,13 +47,14 @@ public class ChatService {
             @Qualifier("defaultChatClient") ChatClient defaultchatClient,
             @Qualifier("customChatClient") ChatClient customChatClient,
             @Qualifier("inMemoryChatClient") ChatClient inMemoryChatClient,
-            @Qualifier("h2MemoryChatClient") ChatClient h2MemoryChatClient,
+            @Qualifier("h2MemoryChatClient") ChatClient h2MemoryChatClient, ChatClient mysqlMemoryChatClient,
             @Qualifier("chatClientWithJdbcChatMemory") ChatClient chatClientWithJdbcChatMemory,
             LoanCalculatorTool loanCalculatorTool) {
         this.defaultchatClient = defaultchatClient;
         this.customChatClient = customChatClient;
         this.inMemoryChatClient = inMemoryChatClient;
         this.h2MemoryChatClient = h2MemoryChatClient;
+        this.mysqlMemoryChatClient = mysqlMemoryChatClient;
         this.chatClientWithJdbcChatMemory = chatClientWithJdbcChatMemory;
         this.loanCalculatorTool = loanCalculatorTool;
     }
@@ -153,6 +155,15 @@ public class ChatService {
 
     public String chatUsingH2ConversationHistory(String userText) {
         return this.h2MemoryChatClient.prompt()
+                .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
+                .user(usr -> usr.text(userText))
+                .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "123ABC"))
+                .call()
+                .content();
+    }
+
+    public String chatUsingMysqlConversationHistory(String userText) {
+        return this.mysqlMemoryChatClient.prompt()
                 .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
                 .user(usr -> usr.text(userText))
                 .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "123ABC"))

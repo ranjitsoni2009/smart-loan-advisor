@@ -1,4 +1,4 @@
-package com.learning.ai.smart_loan_advisor.config.advisor;
+package com.learning.ai.smart_loan_advisor.config.common.advisor;
 
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.context.annotation.Bean;

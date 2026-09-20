@@ -1,4 +1,4 @@
-package com.learning.ai.smart_loan_advisor.config.memory.h2;
+package com.learning.ai.smart_loan_advisor.config.common.h2;
 
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;

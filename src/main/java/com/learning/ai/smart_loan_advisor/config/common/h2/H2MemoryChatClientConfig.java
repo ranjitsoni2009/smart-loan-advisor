@@ -1,4 +1,4 @@
-package com.learning.ai.smart_loan_advisor.config.client;
+package com.learning.ai.smart_loan_advisor.config.common.h2;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;

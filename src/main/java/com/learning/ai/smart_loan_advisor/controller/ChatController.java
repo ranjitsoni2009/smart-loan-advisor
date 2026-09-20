@@ -117,6 +117,12 @@ public class ChatController {
         return ResponseEntity.ok(queryResponse);
     }
 
+    @PostMapping("/chat-using-mysql-memory-history")
+    public ResponseEntity<String> chatWithMysqlMemory(@RequestBody SearchRequest searchRequest) {
+        String queryResponse = chatService.chatUsingMysqlConversationHistory(searchRequest.userText());
+        return ResponseEntity.ok(queryResponse);
+    }
+
     @GetMapping("/query-with-jdbc-memory")
     public ResponseEntity<String> getAnswerBasedOnContextUsingSqlDbChatClient(
             @RequestParam("query") String query,
