@@ -1,4 +1,4 @@
-package com.learning.ai.smart_loan_advisor.config.common.inmemory;
+package com.learning.ai.smart_loan_advisor.config.inmemory;
 
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;

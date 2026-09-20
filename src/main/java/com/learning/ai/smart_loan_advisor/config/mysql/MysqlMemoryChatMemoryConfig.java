@@ -1,4 +1,4 @@
-package com.learning.ai.smart_loan_advisor.config.common.mysql;
+package com.learning.ai.smart_loan_advisor.config.mysql;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.ai.chat.memory.ChatMemory;

@@ -1,4 +1,4 @@
-package com.learning.ai.smart_loan_advisor.config.common.vectordb;
+package com.learning.ai.smart_loan_advisor.config.vectordb;
 
 /**
  * Created by Ranjit Soni on 18-09-2026.

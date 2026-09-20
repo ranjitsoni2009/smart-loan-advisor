@@ -123,6 +123,12 @@ public class ChatController {
         return ResponseEntity.ok(queryResponse);
     }
 
+    @PostMapping("/chat-using-neo4j-memory-history")
+    public ResponseEntity<String> chatWithNeo4jMemory(@RequestBody SearchRequest searchRequest) {
+        String queryResponse = chatService.chatUsingNeo4jConversationHistory(searchRequest.userText());
+        return ResponseEntity.ok(queryResponse);
+    }
+
     @GetMapping("/query-with-jdbc-memory")
     public ResponseEntity<String> getAnswerBasedOnContextUsingSqlDbChatClient(
             @RequestParam("query") String query,

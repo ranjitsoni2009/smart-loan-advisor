@@ -10,6 +10,11 @@ spring:
     console:
       enabled: true
       path: /h2-console
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: password
 
   ai:
     openai:
@@ -19,7 +24,13 @@ spring:
         repository:
           jdbc:
             initialize-schema: always
-
+          neo4j:
+            session-label: Session
+            message-label: Message
+            tool-call-label: ToolCall
+            metadata-label: Metadata
+            tool-response-label: ToolResponse
+            media-label: Media
 logging:
   level:
     org.springframework.ai.chat.client.advisor: DEBUG

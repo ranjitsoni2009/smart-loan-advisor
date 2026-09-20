@@ -39,6 +39,7 @@ public class ChatService {
     private final ChatClient inMemoryChatClient;
     private final ChatClient h2MemoryChatClient;
     private final ChatClient mysqlMemoryChatClient;
+    private final ChatClient neo4jMemoryChatClient;
     private final ChatClient chatClientWithJdbcChatMemory;
     private final LoanCalculatorTool loanCalculatorTool;
 
@@ -47,7 +48,7 @@ public class ChatService {
             @Qualifier("defaultChatClient") ChatClient defaultchatClient,
             @Qualifier("customChatClient") ChatClient customChatClient,
             @Qualifier("inMemoryChatClient") ChatClient inMemoryChatClient,
-            @Qualifier("h2MemoryChatClient") ChatClient h2MemoryChatClient, ChatClient mysqlMemoryChatClient,
+            @Qualifier("h2MemoryChatClient") ChatClient h2MemoryChatClient, ChatClient mysqlMemoryChatClient, ChatClient neo4jMemoryChatClient,
             @Qualifier("chatClientWithJdbcChatMemory") ChatClient chatClientWithJdbcChatMemory,
             LoanCalculatorTool loanCalculatorTool) {
         this.defaultchatClient = defaultchatClient;
@@ -55,6 +56,7 @@ public class ChatService {
         this.inMemoryChatClient = inMemoryChatClient;
         this.h2MemoryChatClient = h2MemoryChatClient;
         this.mysqlMemoryChatClient = mysqlMemoryChatClient;
+        this.neo4jMemoryChatClient = neo4jMemoryChatClient;
         this.chatClientWithJdbcChatMemory = chatClientWithJdbcChatMemory;
         this.loanCalculatorTool = loanCalculatorTool;
     }
@@ -167,6 +169,15 @@ public class ChatService {
                 .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
                 .user(usr -> usr.text(userText))
                 .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "123ABC"))
+                .call()
+                .content();
+    }
+
+    public String chatUsingNeo4jConversationHistory(String userText) {
+        return this.neo4jMemoryChatClient .prompt()
+                .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
+                .user(usr -> usr.text(userText))
+                .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "786DEF"))
                 .call()
                 .content();
     }

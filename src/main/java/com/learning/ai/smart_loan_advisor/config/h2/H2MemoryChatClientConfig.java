@@ -1,4 +1,4 @@
-package com.learning.ai.smart_loan_advisor.config.common.mysql;
+package com.learning.ai.smart_loan_advisor.config.h2;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -13,16 +13,18 @@ import org.springframework.context.annotation.Configuration;
  */
 
 @Configuration
-public class MySqlMemoryChatClientConfig {
-
-    @Autowired
-    private MessageChatMemoryAdvisor mysqlMessageChatMemoryAdvisor;
+public class H2MemoryChatClientConfig {
 
     @Autowired
     private SimpleLoggerAdvisor simpleLoggerAdvisor;
 
+    @Autowired
+    private MessageChatMemoryAdvisor h2MessageChatMemoryAdvisor;
+
     @Bean
-    public ChatClient mysqlMemoryChatClient(ChatClient.Builder builder) {
-        return builder.defaultAdvisors(mysqlMessageChatMemoryAdvisor, simpleLoggerAdvisor).build();
+    public ChatClient h2MemoryChatClient(ChatClient.Builder builder) {
+        return builder.defaultAdvisors(
+                h2MessageChatMemoryAdvisor, simpleLoggerAdvisor)
+                .build();
     }
 }
