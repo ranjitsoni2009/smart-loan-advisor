@@ -1,6 +1,7 @@
 package com.learning.ai.smart_loan_advisor.tool;
 
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,9 +16,13 @@ public class LoanCalculatorTool {
             Use this tool when the user provides loan amount, annual interest rate,
             and loan tenure in years or months.
             The calculation must be performed by this tool instead of guessing.
-            """, name = "calculateEmi")
-    public Record calculateEmi(double loanAmount, double annualInterestRate, int tenureInYears) {
-         record LoanCalculationResult(
+            """, name = "calculateEmi", returnDirect = true)
+    public Record calculateEmi(
+            @ToolParam(description = "loan amount") double loanAmount,
+            @ToolParam(description = "Annual Interest rate") double annualInterestRate,
+            @ToolParam(description = "loan tenure in years") int tenureInYears) {
+
+        record LoanCalculationResult(
                  double loanAmount,
                  double annualInterestRate,
                  int tenureInYears,

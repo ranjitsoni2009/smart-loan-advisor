@@ -7,6 +7,7 @@ import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryRepository;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,9 @@ public class ChatClientConfig {
     @Autowired
     private SimpleLoggerAdvisor simpleLoggerAdvisor;
 
+    @Autowired
+    private ToolCallback weatherToolCallback;
+
     /**
      * Advisor configured during ChatClient build
      * @return ChatClient
@@ -36,6 +40,7 @@ public class ChatClientConfig {
         return builder.defaultAdvisors(
                         messageChatMemoryAdvisorForInMemory(),
                         simpleLoggerAdvisor)
+                .defaultTools(weatherToolCallback)
                 .build();
     }
 

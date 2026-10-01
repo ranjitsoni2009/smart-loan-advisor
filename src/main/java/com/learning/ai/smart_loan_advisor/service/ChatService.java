@@ -64,6 +64,7 @@ public class ChatService {
     public String getAnswerByDefaultChatClient(String query) {
         return defaultchatClient.prompt()
                 .user(query)
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, "123456"))
                 .call()
                 .content();
     }
