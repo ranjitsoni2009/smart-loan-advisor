@@ -42,6 +42,7 @@ public class ChatService {
     private final ChatClient neo4jMemoryChatClient;
     private final ChatClient chatClientWithJdbcChatMemory;
     private final LoanCalculatorTool loanCalculatorTool;
+    private final OrderService orderServiceTool;
 
     @Autowired
     public ChatService(
@@ -50,7 +51,7 @@ public class ChatService {
             @Qualifier("inMemoryChatClient") ChatClient inMemoryChatClient,
             @Qualifier("h2MemoryChatClient") ChatClient h2MemoryChatClient, ChatClient mysqlMemoryChatClient, ChatClient neo4jMemoryChatClient,
             @Qualifier("chatClientWithJdbcChatMemory") ChatClient chatClientWithJdbcChatMemory,
-            LoanCalculatorTool loanCalculatorTool) {
+            LoanCalculatorTool loanCalculatorTool, OrderService orderServiceTool) {
         this.defaultchatClient = defaultchatClient;
         this.customChatClient = customChatClient;
         this.inMemoryChatClient = inMemoryChatClient;
@@ -59,6 +60,7 @@ public class ChatService {
         this.neo4jMemoryChatClient = neo4jMemoryChatClient;
         this.chatClientWithJdbcChatMemory = chatClientWithJdbcChatMemory;
         this.loanCalculatorTool = loanCalculatorTool;
+        this.orderServiceTool = orderServiceTool;
     }
 
     public String getAnswerByDefaultChatClient(String query) {
@@ -152,6 +154,17 @@ public class ChatService {
                 .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
                 .user(usr -> usr.text(userText))
                 .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "123ABC"))
+                .call()
+                .content();
+    }
+
+
+    public String chatWithOrderApiUsingInMemoryConversationHistory(String userText) {
+        return this.defaultchatClient.prompt()
+                .system("You are smart AI assistant, if you don't know answer, Deny request respectfully with quick short statement.")
+                .user(usr -> usr.text(userText))
+                .advisors(advSpec -> advSpec.param(ChatMemory.CONVERSATION_ID, "123ABC"))
+                .tools(orderServiceTool)
                 .call()
                 .content();
     }

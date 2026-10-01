@@ -139,5 +139,11 @@ public class ChatController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/order-api")
+    public ResponseEntity<String> chatWithOrderApi(@RequestBody SearchRequest searchRequest) {
+        String queryResponse = chatService.chatWithOrderApiUsingInMemoryConversationHistory(searchRequest.userText());
+        return ResponseEntity.ok(queryResponse);
+    }
+
 
 }
